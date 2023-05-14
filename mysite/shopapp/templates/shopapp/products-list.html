@@ -20,5 +20,11 @@
         </div>
     {% else %}
         <h3>No products yet</h3>
-    {% endif %} 
+    {% endif %}
+
+    <div>
+        <a href="{% url 'shopapp:create_product' %}">
+            Create a new product
+        </a>
+    </div>
 {% endblock %}
