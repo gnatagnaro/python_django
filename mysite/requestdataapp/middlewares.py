@@ -42,7 +42,7 @@ class ThrottlingMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         self.request_time = {}
-        self.time_delay = 3
+        self.time_delay = 0.1
 
     def __call__(self, request: HttpRequest):
         # Определение IP-адреса пользователя
