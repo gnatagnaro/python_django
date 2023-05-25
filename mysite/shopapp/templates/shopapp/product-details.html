@@ -11,6 +11,8 @@
         <div>Price: {{ product.price }}</div>
         <div>Discount: {{ product.discount }}</div>
         <div>Archived: {{ product.archived }}</div>
+        <div>Created by: {% firstof product.created_by 'None' %}</div>
+
     </div>
     <div><a href="{% url 'shopapp:product_update' pk=product.pk %}">Update product</a></div>
     <div><a href="{% url 'shopapp:product_delete' pk=product.pk %}">Archive product</a></div>

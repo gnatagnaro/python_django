@@ -1,6 +1,5 @@
-from django.http import HttpRequest
-from time import time
-from django.shortcuts import render
+from django.http import HttpRequest, HttpResponseForbidden
+import time
 
 
 def set_useragent_on_request_middleware(get_response):
@@ -38,29 +37,53 @@ class CountRequestsMiddleware:
 
 
 class ThrottlingMiddleware:
-
-    def __init__(self, get_response):
+    def __init__(self, get_response, duration=60, request_limit=500):
         self.get_response = get_response
-        self.request_time = {}
-        self.time_delay = 0.1
+        self.duration = duration
+        self.request_limit = request_limit
+        self.requests = {}
 
-    def __call__(self, request: HttpRequest):
-        # Определение IP-адреса пользователя
-        ip_address = request.META.get('REMOTE_ADDR')
-        # Если последний запрос был сделан недавно, то вернуть ошибку
-        if not self.request_time:
-            print(f"Первый запрос после запуска сервера. Словарь пуст.")
+    def __call__(self, request):
+        ip = request.META.get('REMOTE_ADDR')
+        if ip in self.requests:
+            last_request_time, count = self.requests[ip]
+            if time.time() < last_request_time + self.duration:
+                if count >= self.request_limit:
+                    return HttpResponseForbidden('Too many requests')
+                self.requests[ip] = (last_request_time, count+1)
+            else:
+                self.requests[ip] = (time.time(), 1)
         else:
-            if self.request_time.get('ip_address') == ip_address and time() - self.request_time.get('time') < self.time_delay:
-                print('Прошло менее 10 секунд, после вашего последнего запроса.')
-                return render(request, 'requestdataapp/error-request.html')
-
-        # Получение времени последнего запроса с этого IP-адреса
-        self.request_time = {'time': round(time()), 'ip_address': ip_address}
+            self.requests[ip] = (time.time(), 1)
 
         response = self.get_response(request)
-        # Возврат ответа
         return response
+
+
+# class ThrottlingMiddleware:
+#
+#     def __init__(self, get_response):
+#         self.get_response = get_response
+#         self.request_time = {}
+#         self.time_delay = 0.1
+#
+#     def __call__(self, request: HttpRequest):
+#         # Определение IP-адреса пользователя
+#         ip_address = request.META.get('REMOTE_ADDR')
+#         # Если последний запрос был сделан недавно, то вернуть ошибку
+#         if not self.request_time:
+#             print(f"Первый запрос после запуска сервера. Словарь пуст.")
+#         else:
+#             if self.request_time.get('ip_address') == ip_address and time() - self.request_time.get('time') < self.time_delay:
+#                 print('Прошло менее 10 секунд, после вашего последнего запроса.')
+#                 return render(request, 'requestdataapp/error-request.html')
+#
+#         # Получение времени последнего запроса с этого IP-адреса
+#         self.request_time = {'time': round(time()), 'ip_address': ip_address}
+#
+#         response = self.get_response(request)
+#         # Возврат ответа
+#         return response
 
 # class ThrottlingMiddleware:
 #     THROTTLE_TIME = getattr(settings, 'THROTTLE_TIME', 10)  # время в секундах
