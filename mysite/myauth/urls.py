@@ -3,6 +3,8 @@ from django.urls import path
 from .views import (
     MyLoginView,
     MyLogoutView,
+    AboutMeView,
+    RegisterView,
     # login_view,
     # logout_view,
     get_cookie_view,
@@ -25,6 +27,8 @@ urlpatterns = [
     # ),
     path('login/', MyLoginView.as_view(), name='login'),
     path('logout/', MyLogoutView.as_view(), name='logout'),
+    path('about-me/', AboutMeView.as_view(), name='about-me'),
+    path('register/', RegisterView.as_view(), name='register'),
 
     path('cookie/get/', get_cookie_view, name='cookie-get'),
     path('cookie/set/', set_cookie_view, name='cookie-set'),

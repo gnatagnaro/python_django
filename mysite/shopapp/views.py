@@ -1,5 +1,6 @@
 from timeit import default_timer
 
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import Group
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from django.shortcuts import render, redirect, reverse, get_object_or_404
@@ -112,10 +113,18 @@ class ProductsListView(ListView):
 #     return render(request, 'shopapp/products-list.html', context=context)
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'shopapp.add_product'
+
+    # def test_func(self):
+    #     return self.request.user.is_superuser
     model = Product
     form_class = ProductForm  # аналогично: fields = 'name', 'price', 'description', 'discount'
     success_url = reverse_lazy('shopapp:products_list')
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        return super().form_valid(form)
 
     # В задании просят прописывать методы гет и пост, но зачем, если в классе CreateView все происходит под капотом.
     # def get(self, request: HttpRequest) -> HttpResponse:
@@ -153,7 +162,12 @@ class ProductCreateView(CreateView):
 #     return render(request, 'shopapp/product_form.html', context=context)
 
 
-class ProductUpdateView(UpdateView):
+class ProductUpdateView(UserPassesTestMixin, UpdateView):
+    def test_func(self):
+        product = self.get_object()
+        user = self.request.user
+        return self.request.user.is_superuser or (user.has_perm('shopapp.change_product') and product.created_by == user)
+
     model = Product
     form_class = ProductForm
     success_url = reverse_lazy('shopapp:products_list')
@@ -177,7 +191,7 @@ class ProductDeleteView(DeleteView):
         return HttpResponseRedirect(success_url)
 
 
-class OrdersListView(ListView):
+class OrdersListView(LoginRequiredMixin, ListView):
     # template_name = 'shopapp/order_list.html'
     # model = Order
     # context_object = 'orders'
@@ -192,7 +206,8 @@ class OrdersListView(ListView):
 #     return render(request, 'shopapp/order_list.html', context=context)
 
 
-class OrdersDetailView(DetailView):
+class OrdersDetailView(PermissionRequiredMixin, DetailView):
+    permission_required = 'shopapp.view_order'
     queryset = (
         Order.objects.select_related('user').prefetch_related('products')
     )
