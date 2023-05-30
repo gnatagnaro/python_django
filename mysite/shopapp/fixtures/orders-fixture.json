@@ -1,0 +1,56 @@
+[
+  {
+    "model": "shopapp.order",
+    "pk": 1,
+    "fields": {
+      "delivery_address": "ul Pupkina d 8",
+      "promocode": "SALE123",
+      "created_at": "2023-05-04T10:55:54.401Z",
+      "user": 1,
+      "products": [
+        2,
+        1,
+        3
+      ]
+    }
+  },
+  {
+    "model": "shopapp.order",
+    "pk": 2,
+    "fields": {
+      "delivery_address": "Obninsk, street Polenova 11",
+      "promocode": "SALE123",
+      "created_at": "2023-05-14T11:05:30.964Z",
+      "user": 1,
+      "products": [
+        4
+      ]
+    }
+  },
+  {
+    "model": "shopapp.order",
+    "pk": 7,
+    "fields": {
+      "delivery_address": "#3",
+      "promocode": "132",
+      "created_at": "2023-05-22T16:51:51.638Z",
+      "user": 1,
+      "products": [
+        6
+      ]
+    }
+  },
+  {
+    "model": "shopapp.order",
+    "pk": 8,
+    "fields": {
+      "delivery_address": "",
+      "promocode": "",
+      "created_at": "2023-05-26T20:34:39.805Z",
+      "user": 1,
+      "products": [
+        6
+      ]
+    }
+  }
+]
