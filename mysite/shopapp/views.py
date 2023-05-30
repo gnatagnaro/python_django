@@ -2,7 +2,7 @@ from timeit import default_timer
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import Group
-from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
+from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
@@ -10,8 +10,6 @@ from django.views.generic import TemplateView, ListView, DetailView, CreateView,
 
 from .models import Product, Order
 from .forms import ProductForm, OrderForm, GroupForm
-
-# Create your views here.
 
 
 class ShopIndexView(View):
@@ -31,23 +29,6 @@ class ShopIndexView(View):
         return render(request, 'shopapp/shop-index.html', context=context)
 
 
-#
-# def shop_index(request: HttpRequest) -> HttpResponse:
-#     """
-#     :param request:
-#     :return:
-#     """
-#     products = [
-#         ('Laptop', 1999),
-#         ('Desktop', 2999),
-#         ('Smartphone', 999),
-#     ]
-#     context = {'time_running': default_timer(),
-#                'products': products,
-#                }
-#     return render(request, 'shopapp/shop-index.html', context=context)
-
-
 class GroupsListView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         context = {
@@ -62,18 +43,6 @@ class GroupsListView(View):
             form.save()
         # return redirect(reverse('shopapp:groups_list'))
         return redirect(request.path)
-
-
-# def groups_list(request: HttpRequest) -> HttpResponse:
-#     """
-#
-#     :param request:
-#     :return:
-#     """
-#     context = {
-#         'groups': Group.objects.prefetch_related('permissions').all(),
-#     }
-#     return render(request, 'shopapp/groups-list.html', context=context)
 
 
 class ProductDetailsView(DetailView):
@@ -106,12 +75,6 @@ class ProductsListView(ListView):
     #     context['products'] = Product.objects.all()
     #     return context
 
-# def products_list(request: HttpRequest) -> HttpResponse:
-#     context = {
-#         'products': Product.objects.all(),
-#     }
-#     return render(request, 'shopapp/products-list.html', context=context)
-
 
 class ProductCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'shopapp.add_product'
@@ -140,26 +103,6 @@ class ProductCreateView(PermissionRequiredMixin, CreateView):
     #         form.save()
     #         # url = reverse('shopapp:products_list')
     #     return redirect(request.path)
-
-
-# def create_product(request: HttpRequest) -> HttpResponse:
-#     if request.method == 'POST':
-#         form = ProductForm(request.POST)
-#         if form.is_valid():
-#             # name = form.cleaned_data['name']
-#             # price = form.cleaned_data['price']
-#             # discount = form.cleaned_data['discount']
-#             # Product.objects.create(name=name, price=price, discount=discount)
-#             # Product.objects.create(**form.cleaned_data)
-#             form.save()
-#             url = reverse('shopapp:products_list')
-#             return redirect(url)
-#     else:
-#         form = ProductForm()
-#     context = {
-#         'form': form,
-#     }
-#     return render(request, 'shopapp/product_form.html', context=context)
 
 
 class ProductUpdateView(UserPassesTestMixin, UpdateView):
@@ -199,12 +142,6 @@ class OrdersListView(LoginRequiredMixin, ListView):
         Order.objects.select_related('user').prefetch_related('products')
     )
 
-# def orders_list(request: HttpRequest) -> HttpResponse:
-#     context = {
-#         'orders': Order.objects.select_related('user').prefetch_related('products').all(),
-#     }
-#     return render(request, 'shopapp/order_list.html', context=context)
-
 
 class OrdersDetailView(PermissionRequiredMixin, DetailView):
     permission_required = 'shopapp.view_order'
@@ -236,6 +173,40 @@ class OrderDeleteView(DeleteView):
     model = Order
     success_url = reverse_lazy('shopapp:orders_list')
 
+
+class ProductsDataExportView(View):
+    def get(self, request: HttpRequest) -> JsonResponse:
+        products = Product.objects.order_by('pk').all()
+        products_data = [
+            {
+                'pk': product.pk,
+                'name': product.name,
+                'price': product.price,
+                'archived': product.archived,
+            }
+            for product in products
+        ]
+        return JsonResponse({'products': products_data})
+
+
+class OrdersDataExportView(UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get(self, request: HttpRequest) -> JsonResponse:
+        orders = Order.objects.order_by('pk').all()
+        orders_data = [
+            {
+                'pk': order.pk,
+                'delivery_address': order.delivery_address,
+                'promocode': order.pormocode,
+                'user_id': order.user_id,
+                'products_id': [product.id for product in order.products.all()]
+            }
+            for order in orders
+        ]
+        return JsonResponse({"orders": orders_data})
+
 # def create_order(request: HttpRequest) -> HttpResponse:
 #     if request.method == 'POST':
 #         form = OrderForm(request.POST)
@@ -249,3 +220,63 @@ class OrderDeleteView(DeleteView):
 #         'form': form,
 #     }
 #     return render(request, 'shopapp/order_form.html', context=context)
+
+
+# def create_product(request: HttpRequest) -> HttpResponse:
+#     if request.method == 'POST':
+#         form = ProductForm(request.POST)
+#         if form.is_valid():
+#             # name = form.cleaned_data['name']
+#             # price = form.cleaned_data['price']
+#             # discount = form.cleaned_data['discount']
+#             # Product.objects.create(name=name, price=price, discount=discount)
+#             # Product.objects.create(**form.cleaned_data)
+#             form.save()
+#             url = reverse('shopapp:products_list')
+#             return redirect(url)
+#     else:
+#         form = ProductForm()
+#     context = {
+#         'form': form,
+#     }
+#     return render(request, 'shopapp/product_form.html', context=context)
+
+# def orders_list(request: HttpRequest) -> HttpResponse:
+#     context = {
+#         'orders': Order.objects.select_related('user').prefetch_related('products').all(),
+#     }
+#     return render(request, 'shopapp/order_list.html', context=context)
+
+# def products_list(request: HttpRequest) -> HttpResponse:
+#     context = {
+#         'products': Product.objects.all(),
+#     }
+#     return render(request, 'shopapp/products-list.html', context=context)
+
+
+#
+# def shop_index(request: HttpRequest) -> HttpResponse:
+#     """
+#     :param request:
+#     :return:
+#     """
+#     products = [
+#         ('Laptop', 1999),
+#         ('Desktop', 2999),
+#         ('Smartphone', 999),
+#     ]
+#     context = {'time_running': default_timer(),
+#                'products': products,
+#                }
+#     return render(request, 'shopapp/shop-index.html', context=context)
+
+# def groups_list(request: HttpRequest) -> HttpResponse:
+#     """
+#
+#     :param request:
+#     :return:
+#     """
+#     context = {
+#         'groups': Group.objects.prefetch_related('permissions').all(),
+#     }
+#     return render(request, 'shopapp/groups-list.html', context=context)
