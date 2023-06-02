@@ -1,0 +1,50 @@
+[
+  {
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+      "name": "example_group",
+      "permissions": [
+        9,
+        10,
+        11,
+        12
+      ]
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 2,
+    "fields": {
+      "name": "another_group",
+      "permissions": [
+        17,
+        18,
+        19,
+        20
+      ]
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 3,
+    "fields": {
+      "name": "profile_manager",
+      "permissions": [
+        36
+      ]
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 4,
+    "fields": {
+      "name": "qwerty",
+      "permissions": [
+        17,
+        33,
+        21
+      ]
+    }
+  }
+]

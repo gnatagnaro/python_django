@@ -199,7 +199,7 @@ class OrdersDataExportView(UserPassesTestMixin, View):
             {
                 'pk': order.pk,
                 'delivery_address': order.delivery_address,
-                'promocode': order.pormocode,
+                'promocode': order.promocode,
                 'user_id': order.user_id,
                 'products_id': [product.id for product in order.products.all()]
             }
