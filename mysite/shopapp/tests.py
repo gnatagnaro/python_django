@@ -207,6 +207,8 @@ class ProductsExportViewTestCase(TestCase):
     fixtures = [
         'users-fixture.json',
         'products-fixture.json',
+        'auth-group-fixture.json',
+        'auth-permission-fixture',
     ]
 
     def test_get_products_view(self):
@@ -231,16 +233,21 @@ class OrdersExportViewTestCase(TestCase):
         'users-fixture.json',
         'products-fixture.json',
         'orders-fixture.json',
+        'auth-group-fixture.json',
+        'auth-permission-fixture',
+        'auth-user-fixture',
     ]
 
     @classmethod
     def setUpClass(cls):
-        cls.user = User.objects.create_user(username='user', password='password')
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='newuser', password='del123d54')
         cls.user.is_staff = True
         cls.user.save()
 
     @classmethod
     def tearDownClass(cls):
+        super().tearDownClass()
         cls.user.delete()
 
     def setUp(self) -> None:
@@ -254,11 +261,11 @@ class OrdersExportViewTestCase(TestCase):
             {
                 'pk': order.pk,
                 'delivery_address': order.delivery_address,
-                'promocode': order.pormocode,
+                'promocode': order.promocode,
                 'user_id': order.user_id,
                 'products_id': [product.id for product in order.products.all()]
             }
             for order in orders
         ]
-        product_data = response.json()
-        self.assertEqual(product_data['orders'], expected_data)
+        order_data = response.json()
+        self.assertEqual(order_data['orders'], expected_data)
