@@ -247,8 +247,8 @@ class OrdersExportViewTestCase(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        super().tearDownClass()
         cls.user.delete()
+        super().tearDownClass()
 
     def setUp(self) -> None:
         self.client.force_login(self.user)
