@@ -13,6 +13,23 @@
         <div>Archived: {{ product.archived }}</div>
         <div>Created by: {% firstof product.created_by 'None' %}</div>
 
+        {% if product.preview %}
+            <img src="{{ product.preview.url }}" alt="{{ product.preview.name }}">
+        {% endif %}
+
+        <h3>Images:</h3>
+        <div>
+            {% for img in product.images.all %}
+                <div>
+                    <img src="{{ img.image.url }}" alt="{{ img.image.name }}">
+                    <div>{{ img.description }}</div>
+                </div>
+            {% empty %}
+                <div>No images yet</div>
+            {% endfor %}
+
+        </div>
+
     </div>
     <div><a href="{% url 'shopapp:product_update' pk=product.pk %}">Update product</a></div>
     <div><a href="{% url 'shopapp:product_delete' pk=product.pk %}">Archive product</a></div>

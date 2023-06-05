@@ -13,7 +13,22 @@
         <p>Last name: {{ user.last_name }}</p>
         <p>Email: {{ user.email }}</p>
         <p>Bio: {{ user.profile.bio }}</p>
+
+        {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="{{ profile.avatar.name }}">
+        {% else %}
+            <p>No avatar yet</p>
+        {% endif %}
+        <div><a href="{% url 'myauth:user-list' %}">Back to users list</a></div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">
+                Update Avatar
+            </button>
+        </form>
     {% else %}
         <h2>User is anonymous</h2>
-    {% endif %} 
+    {% endif %}
 {% endblock %}

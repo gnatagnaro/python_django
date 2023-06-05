@@ -8,7 +8,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 
-from .models import Product, Order
+from .models import Product, Order, ProductImage
 from .forms import ProductForm, OrderForm, GroupForm
 
 
@@ -49,9 +49,8 @@ class ProductDetailsView(DetailView):
     template_name = 'shopapp/product-details.html'
     # model = Product
     context_object_name = 'product'
-    queryset = (
-        Product.objects.filter(archived=False)
-    )
+    queryset = Product.objects.prefetch_related('images')
+    # Product.objects.filter(archived=False),
 
     # def get(self, request: HttpRequest, pk: int) -> HttpResponse:
     #     # product = Product.objects.get(pk=pk)
@@ -121,6 +120,15 @@ class ProductUpdateView(UserPassesTestMixin, UpdateView):
             'shopapp:product_details',
             kwargs={'pk': self.object.pk}
         )
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        for image in form.files.getlist('images'):
+            ProductImage.objects.create(
+                product=self.object,
+                image=image,
+            )
+        return response
 
 
 class ProductDeleteView(DeleteView):
