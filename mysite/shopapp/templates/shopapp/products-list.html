@@ -14,6 +14,10 @@
                 <p>Price: {{ product.price }}</p>
                 <p>Discount: {% firstof product.discount 'no discount' %}</p>
                 <p>Created by: {% firstof product.created_by 'None' %}</p>
+                
+                {% if product.preview %}
+                    <img src="{{ product.preview.url }}" alt="{{ product.preview.name }}">
+                {% endif %}
             </div>
 
         {% endfor %}

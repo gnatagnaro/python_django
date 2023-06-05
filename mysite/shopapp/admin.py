@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from shopapp.models import Product, Order
+from shopapp.models import Product, Order, ProductImage
 from .admin_mixins import ExportAsCSVMixin
 
 # Register your models here.
@@ -10,6 +10,10 @@ from .admin_mixins import ExportAsCSVMixin
 
 class OrderInline(admin.TabularInline):
     model = Product.orders.through
+
+
+class ProductInline(admin.StackedInline):
+    model = ProductImage
 
 
 @admin.action(description='Archive products')
@@ -31,6 +35,7 @@ class ProductAdmin(admin.ModelAdmin, ExportAsCSVMixin):
     ]
     inlines = [
         OrderInline,
+        ProductInline,
     ]
     # list_display = 'pk', 'name', 'description', 'price', 'discount'
     readonly_fields = ('created_at',)
@@ -56,6 +61,9 @@ class ProductAdmin(admin.ModelAdmin, ExportAsCSVMixin):
             'fields': ('created_at',),
             'classes': ('wide',),
         }),
+        ('Images', {
+            'fields': ('preview',),
+        }),
     ]
 
     def description_short(self, obj: Product) -> str:
@@ -76,13 +84,13 @@ class OrderAdmin(admin.ModelAdmin):
         ProductInline,
     ]
     readonly_fields = ('created_at',)
-    list_display = ('pk', 'delivery_address', 'promocode', 'created_at', 'user_verbose',)
-    list_display_links = ('pk', 'delivery_address',)
+    list_display = ('pk', 'delivery_address', 'promocode', 'created_at', 'user_verbose', 'receipt',)
+    list_display_links = ('pk', 'delivery_address', 'receipt',)
     ordering = ('pk',)
     search_fields = ('pk', 'delivery_address', 'promocode', 'created_at', 'user_verbose',)
     fieldsets = [
         ('Main', {
-           'fields': ('delivery_address', 'promocode'),
+           'fields': ('delivery_address', 'promocode', 'receipt'),
            'classes': ('wide', 'collapse',)
         }),
         ('User Options', {
