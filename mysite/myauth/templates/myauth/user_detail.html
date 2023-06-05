@@ -1,0 +1,23 @@
+{% extends 'myauth/base.html' %}
+{% block title %}
+    User Details
+{% endblock %}
+
+{% block main %}
+    <h1>User {{ user.username }} Details</h1>
+    <a href="{% url 'myauth:user-list' %}">Back to list</a>
+    <br>
+    {% if request.user == user or request.user.is_staff %}
+        <a href="{% url 'myauth:update-profile' user.pk %}">Update Profile</a>
+    {% endif %}
+    <h2>Name: {{ user.username }}</h2>
+    <div>Bio: {{ user.profile.bio }}</div>
+    <div>Agreement accepted: {{ user.profile.agreement_accepted }}</div>
+
+    {% if user.profile.avatar %}
+        <img src="{{ user.profile.avatar.url }}" alt="Avatar">
+    {% else %}
+        <p>No avatar available.</p>
+    {% endif %}
+
+{% endblock %}

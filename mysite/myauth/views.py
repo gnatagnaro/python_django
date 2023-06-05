@@ -3,15 +3,83 @@ from django.contrib.auth.decorators import login_required, permission_required, 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
-from django.views.generic import TemplateView, CreateView, View
+from django.views.generic import TemplateView, CreateView, View, ListView, DetailView, UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-from .models import Profile
+from .forms import AvatarForm
+from .models import Profile, User
 
 
-class AboutMeView(TemplateView):
+class AboutMeView(LoginRequiredMixin, UpdateView):
     template_name = 'myauth/about-me.html'
+    form_class = AvatarForm
+    model = Profile
+    success_url = reverse_lazy('myauth:about-me')
+    context_object_name = 'profile'
+
+    def get_object(self):
+        profile, created = Profile.objects.get_or_create(user=self.request.user)
+        return profile
+
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     profile = self.get_object()
+    #     context['profile'] = profile
+    #     return context
+
+    def form_valid(self, form):
+        profile = self.get_object()
+        profile.avatar = form.cleaned_data['avatar']
+        profile.save()
+        return super().form_valid(form)
+
+
+class UsersListView(LoginRequiredMixin, ListView):
+    template_name = 'myauth/user_list.html'
+    model = User
+    context_object_name = 'users'
+
+
+class UsersDetailView(LoginRequiredMixin, DetailView):
+    template_name = 'myauth/user_detail.html'
+    model = User
+    context_object_name = 'user'
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(User, pk=self.kwargs['pk'])
+
+    def test_func(self):
+        user = self.get_object()
+        return self.request.user.is_staff or self.request.user == user
+
+    def get_success_url(self):
+        return reverse('user-details', kwargs={'pk': self.kwargs['pk']})
+
+
+class UpdateProfileView(UserPassesTestMixin, UpdateView):
+    template_name = 'myauth/update_profile.html'
+    model = Profile
+    form_class = AvatarForm
+    success_url = reverse_lazy('myauth:about-me')
+
+    # def get_success_url(self):
+    #     return reverse('myauth:user-detail', kwargs={'pk': self.object.pk})
+
+    def test_func(self):
+        user = self.request.user
+        return self.request.user.is_staff or user == self.request.user
+
+    def get_object(self, queryset=None):
+        user = get_object_or_404(User, pk=self.kwargs['pk'])
+        profile, _ = Profile.objects.get_or_create(user=user)
+        return profile
+    # def form_valid(self, form):
+    #     profile = self.request.user
+    #     profile.avatar = form.cleaned_data['avatar']
+    #     profile.save()
+    #     return super().form_valid(form)
 
 
 class RegisterView(CreateView):
