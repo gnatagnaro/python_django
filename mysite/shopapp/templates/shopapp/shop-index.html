@@ -21,12 +21,18 @@
             {% for name, price in products %}
                 <li>{{ name }} ({{ name|length }}): ${{ price }}</li>
                 {% if name|length == 7 %}
-                <span>Lucky</span>
+                    <span>Lucky</span>
                 {% endif %}
-                {% empty %}
-                    No products here
+            {% empty %}
+                No products here
             {% endfor %}
-            
+
         </ul>
+    </div>
+
+    <div>
+        <strong>
+            You have {{ items }} cherr{{ items|pluralize:'y, ies' }}
+        </strong>
     </div>
 {% endblock %}
