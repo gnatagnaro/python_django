@@ -1,35 +1,53 @@
-{% extends 'shopapp/base.html'%}
+{% extends 'shopapp/base.html' %}
+
+{% load i18n %}
 
 {% block title %}
-    Products List
+    {% translate 'Products List' %}
 {% endblock %}
 
 {% block main %}
-    <h1>Products:</h1>
+    <h1>{% translate 'Products' %}:</h1>
     {% if products %}
         <div>
-        {% for product in products %}
-            <div>
-                <p><a href="{% url 'shopapp:product_details' pk=product.pk %}">Name: {{ product.name }}</a></p>
-                <p>Price: {{ product.price }}</p>
-                <p>Discount: {% firstof product.discount 'no discount' %}</p>
-                <p>Created by: {% firstof product.created_by 'None' %}</p>
-                
-                {% if product.preview %}
-                    <img src="{{ product.preview.url }}" alt="{{ product.preview.name }}">
-                {% endif %}
-            </div>
+            {% blocktranslate count products_count=products|length %}
+                There is only one product.
+                {% plural %}
+                There are {{ products_count }} products.
+            {% endblocktranslate %}
+        </div>
+        <div>
+            {% for product in products %}
+                <div>
+                    <p>
+                        <a href="{% url 'shopapp:product_details' pk=product.pk %}">{% translate 'Name' context 'product name' %}: {{ product.name }}</a>
+                    </p>
+                    <p>{% translate 'Price' %}: {{ product.price }}</p>
+                    {% translate 'no discount' as no_discount %}
+                    <p>{% translate 'Discount' %}: {% firstof product.discount no_discount %}</p>
+                    {% translate 'None' as none %}
+                    <p>{% translate 'Created by' %}: {% firstof product.created_by none %}</p>
 
-        {% endfor %}
+                    {% if product.preview %}
+                        <img src="{{ product.preview.url }}" alt="{{ product.preview.name }}">
+                    {% endif %}
+                </div>
+
+            {% endfor %}
 
         </div>
     {% else %}
-        <h3>No products yet</h3>
+        <h3>{% translate 'No products yet' %}</h3>
     {% endif %}
     <br>
     {% if perms.shopapp.add_product %}
-    <div>
-        <a href="{% url 'shopapp:product_create' %}">Create a new product</a>
-    </div>
+        <div>
+            <a href="{% url 'shopapp:product_create' %}">{% translate 'Create a new product' %}</a>
+        </div>
+    {% else %}
+        {% url 'shopapp:product_create' as create_product_url %}
+        {% blocktranslate %}
+            <a href="{{ create_product_url }}">Create a new one</a>
+        {% endblocktranslate %}
     {% endif %}
 {% endblock %}

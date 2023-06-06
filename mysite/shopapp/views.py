@@ -14,18 +14,16 @@ from .forms import ProductForm, OrderForm, GroupForm
 
 class ShopIndexView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
-        """
-        :param request:
-        :return:
-        """
         products = [
             ('Laptop', 1999),
             ('Desktop', 2999),
             ('Smartphone', 999),
         ]
-        context = {'time_running': default_timer(),
-                   'products': products,
-                   }
+        context = {
+            'time_running': default_timer(),
+            'products': products,
+            'items': 5,
+        }
         return render(request, 'shopapp/shop-index.html', context=context)
 
 
@@ -108,7 +106,8 @@ class ProductUpdateView(UserPassesTestMixin, UpdateView):
     def test_func(self):
         product = self.get_object()
         user = self.request.user
-        return self.request.user.is_superuser or (user.has_perm('shopapp.change_product') and product.created_by == user)
+        return self.request.user.is_superuser or (
+                    user.has_perm('shopapp.change_product') and product.created_by == user)
 
     model = Product
     form_class = ProductForm
