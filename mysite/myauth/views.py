@@ -50,10 +50,6 @@ class UsersDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(User, pk=self.kwargs['pk'])
 
-    def test_func(self):
-        user = self.get_object()
-        return self.request.user.is_staff or self.request.user == user
-
     def get_success_url(self):
         return reverse('user-details', kwargs={'pk': self.kwargs['pk']})
 

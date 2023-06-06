@@ -136,3 +136,5 @@ dmypy.json
 log.txt
 probe.py
 .idea/
+
+mysite/uploads/
