@@ -1,38 +1,48 @@
 {% extends 'shopapp/base.html' %}
 
+{% load i18n %}
+
 {% block title %}
-    Product #{{ product.pk }}
+    {% translate 'Product' %} #{{ product.pk }}
 {% endblock %}
 
 {% block main %}
-    <h1>Product <strong>{{ product.name }}</strong></h1>
+    <h1>{% translate 'Product' %} <strong>{{ product.name }}</strong></h1>
     <div>
-        <div>Description: <em>{{ product.description }}</em></div>
-        <div>Price: {{ product.price }}</div>
-        <div>Discount: {{ product.discount }}</div>
-        <div>Archived: {{ product.archived }}</div>
-        <div>Created by: {% firstof product.created_by 'None' %}</div>
+        <div>{% translate 'Description' %}: <em>{{ product.description }}</em></div>
+        <div>{% translate 'Price' %}: {{ product.price }}</div>
+        <div>{% translate 'Discount' %}: {{ product.discount }}</div>
+        <div>{% translate 'Archived' %}: {{ product.archived }}</div>
+        {% translate 'None' as none %}
+        <div>{% translate 'Created by' %}: {% firstof product.created_by none %}</div>
 
         {% if product.preview %}
             <img src="{{ product.preview.url }}" alt="{{ product.preview.name }}">
         {% endif %}
 
-        <h3>Images:</h3>
-        <div>
+        <h3>{% translate 'Images' %}:</h3>
+        {% if product.images %}
+            <div>
+                {% blocktranslate count images_count=product.images.count %}
+                    There is only one image.
+                    {% plural %}
+                    There are {{ images_count }} images available.
+                {% endblocktranslate %}
+            </div>
+            <div>
             {% for img in product.images.all %}
                 <div>
                     <img src="{{ img.image.url }}" alt="{{ img.image.name }}">
                     <div>{{ img.description }}</div>
                 </div>
             {% empty %}
-                <div>No images yet</div>
+                <div>{% translate 'No images yet' %}</div>
             {% endfor %}
-
+        {% endif %}
         </div>
 
     </div>
-    <div><a href="{% url 'shopapp:product_update' pk=product.pk %}">Update product</a></div>
-    <div><a href="{% url 'shopapp:product_delete' pk=product.pk %}">Archive product</a></div>
-    <div><a href="{% url 'shopapp:products_list' %}">Back to products list</a></div>
+    <div><a href="{% url 'shopapp:product_update' pk=product.pk %}">{% translate 'Update product' %}</a></div>
+    <div><a href="{% url 'shopapp:product_delete' pk=product.pk %}">{% translate 'Archive product' %}</a></div>
+    <div><a href="{% url 'shopapp:products_list' %}">{% translate 'Back to products list' %}</a></div>
 {% endblock %}
-
