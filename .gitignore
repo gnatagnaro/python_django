@@ -137,4 +137,4 @@ log.txt
 probe.py
 .idea/
 
-mysite/uploads/
+mysite/uploads/*
