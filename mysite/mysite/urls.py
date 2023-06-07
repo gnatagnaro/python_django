@@ -23,8 +23,11 @@ from django.conf.urls.i18n import i18n_patterns
 
 urlpatterns = [
     path('req/', include('requestdataapp.urls')),
+<<<<<<< HEAD
     path('api/', include('myapiapp.urls')),
 
+=======
+>>>>>>> c88c883b9bde7e110441c230dc079d8deef97893
 ]
 
 urlpatterns += i18n_patterns(
