@@ -14,8 +14,9 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
 from .views import (
     ShopIndexView,
     GroupsListView,
@@ -31,18 +32,31 @@ from .views import (
     OrderUpdateView,
     OrderDeleteView,
     OrdersDataExportView,
+    ProductViewSet,
+    OrderViewSet,
 )
 
 app_name = 'shopapp'
+
+routers = DefaultRouter()
+routers.register('products', ProductViewSet)
+routers.register('orders', OrderViewSet)
+
+
 urlpatterns = [
+    path('api/', include(routers.urls), name='api'),
+
     path('', ShopIndexView.as_view(), name='index'),
+
     path('groups/', GroupsListView.as_view(), name='groups_list'),
+
     path('products/', ProductsListView.as_view(), name='products_list'),
     path('products/create/', ProductCreateView.as_view(), name='product_create'),
     path('products/export/', ProductsDataExportView.as_view(), name='products-export'),
     path("products/<int:pk>/", ProductDetailsView.as_view(), name='product_details'),
     path('products/<int:pk>/update/', ProductUpdateView.as_view(), name='product_update'),
     path('products/<int:pk>/archive/', ProductDeleteView.as_view(), name='product_delete'),
+
     path('orders/', OrdersListView.as_view(), name='orders_list'),
     path('orders/create/', OrderCreateView.as_view(), name='order_create'),
     path('orders/export/', OrdersDataExportView.as_view(), name='orders-export'),
