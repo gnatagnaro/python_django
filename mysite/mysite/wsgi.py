@@ -14,3 +14,6 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
 
 application = get_wsgi_application()
+
+# sys.path.append('/path/to/project)
+os.environ["DJANGO_SETTINGS_MODULE"] = 'drf_spectacular'
